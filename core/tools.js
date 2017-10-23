@@ -2036,6 +2036,37 @@
 					acc = fn.call( thisArg, acc, array[ i ], i, array );
 				}
 				return acc;
+			},
+
+			/**
+			 * Method tests whether all elements in the array pass the test implemented by the provided function.
+			 * Returns `true` if provided array is empty.
+			 *
+			 *		var every = this.array.every( [ 11, 22, 33, 44 ], function( value ) {
+			 *			return value > 10;
+			 *		} );
+			 *		console.log( every );
+			 *		// Logs: true
+			 *
+			 * @param {Array} array
+			 * @param {Function} fn A function that gets called with each `array` item.
+			 * @param {Mixed} fn.value The currently iterated array value.
+			 * @param {Number} fn.index The index of the currently iterated value in an array.
+			 * @param {Array} fn.array The original array passed as the `array` variable.
+			 * @param {Mixed} [thisArg=undefined] A context object for `fn`.
+			 * @returns {Boolean} Information if all elements pass the test.
+			 * @member CKEDITOR.tools.array
+			 * @since 4.8.0
+			 */
+			every: function( array, fn, thisArg ) {
+				// Empty arrays always return true.
+				if ( !array.length ) {
+					return true;
+				}
+
+				var ret = this.filter( array, fn, thisArg );
+
+				return array.length === ret.length;
 			}
 		},
 
@@ -2069,6 +2100,59 @@
 				}
 
 				return null;
+			},
+
+			/**
+			 * Merges two objects and returns new one.
+			 *
+			 *		var obj1 = {
+			 *				a: 1,
+			 *				conflicted: 10,
+			 *				obj: {
+			 *					c: 1
+			 *				}
+			 *			},
+			 *			obj2 = {
+			 *				b: 2,
+			 *				conflicted: 20,
+			 *				obj: {
+			 *					d: 2
+			 *				}
+			 *			};
+			 *
+			 *		CKEDITOR.tools.object.merge( obj1, obj2 );
+			 *
+			 * This code produces the following object;
+			 *
+			 *		{
+			 *			a: 1,
+			 *			b: 2,
+			 *			conflicted: 20,
+			 *			obj: {
+			 *				c: 1,
+			 *				d: 2
+			 *			}
+			 *		}
+			 *
+			 * @param {Object} obj1 Source object, which will be used to create a new base object.
+			 * @param {Object} obj2 An object, which properties will be merged to the base one.
+			 * @returns {Object} Merged object.
+			 * @member CKEDITOR.tools.object
+			 */
+			merge: function( obj1, obj2 ) {
+				var tools = CKEDITOR.tools,
+					copy1 = tools.clone( obj1 ),
+					copy2 = tools.clone( obj2 );
+
+				tools.array.forEach( tools.objectKeys( copy2 ), function( key ) {
+					if ( typeof copy2[ key ] === 'object' && typeof copy1[ key ] === 'object' ) {
+						copy1[ key ] = tools.object.merge( copy1[ key ], copy2[ key ] );
+					} else {
+						copy1[ key ] = copy2[ key ];
+					}
+				} );
+
+				return copy1;
 			}
 		}
 	};
